@@ -8,7 +8,7 @@ subtitle: ""
 description: ""
 keywords:
 author: Yuting
-language: en
+language: zh-CN
 timezone: ""
 
 # URL
@@ -102,6 +102,4 @@ theme: next
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
-  type: git
-  repo: https://huangyuting-lab.github.io.git
-  branch: master
+  type: ""
