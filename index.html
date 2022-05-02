@@ -1,0 +1,127 @@
+<div id="main">
+    <div id="sun" onclick="onClickSun()" title="Click me to change the color of sun light"></div>
+    <div id="fan"></div>
+    <div id="buttons">
+        <div id="button-speed" onclick="onClickSpeed()" title="Click me to change the speed of fan"></div>
+        <div id="button-dir" onclick="onClickDir()" title="Click me to change the rotation direction of fan"></div>
+        <div id="button-vane" onclick="onClickVane()" title="Click me to change the number of vanes"></div>
+    </div>
+</div>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+<script>
+    const colors = ['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple', 'pink'] // 颜色集合
+    const black = '#000' // 黑色
+    const speeds = [200, 50, 20, 10] // 风扇转速集合
+    const vaneNums = [4, 5, 2, 3] // 扇叶数量集合
+</script>
+<script>
+    const sunContainer = { x: 60, y: 60 } // 太阳画布宽高
+    const sun = new Raphael("sun", sunContainer.x, sunContainer.y) // 太阳Raphael类
+    const sunAngle = 135 // 太阳角度
+    const sunR = Math.min(sunContainer.x, sunContainer.y) / 2 // 太阳半径
+    let sunColor = colors[0] // 太阳颜色
+    const paintSun = () => {
+        sun.clear() // 清空太阳画布
+        const sunStyle = { fill: sunColor, stroke: black } // 太阳样式
+        sun.circle(sunContainer.x / 2, sunContainer.y / 2, sunR).attr(sunStyle) // 绘制太阳
+    }
+    paintSun()
+</script>
+<script>
+    const fanContainer = { x: 400, y: 600 } // 风扇画布宽高
+    const fan = new Raphael("fan", fanContainer.x, fanContainer.y) // 风扇Raphael类
+    const center = { x: fanContainer.x / 2, y: 175 } // 风扇轴中心点
+    const axleR = 25 // 风扇轴半径
+    const stickWidth = 12 // 风扇杆宽度
+    const stickHeight = fanContainer.y - center.y // 风扇杆高度
+    let timer = speeds[0] // 风扇转速
+    let isCW = true // 风扇转向 true-顺时针 flase-逆时针
+    let vaneNum = vaneNums[0] // 扇叶数量
+    const vaneCircleNum = 22 // 同一片扇叶上，依次排列的小圆圈数量
+    let key = 0 // 全局计数
+    let interval // 定时器
+
+    const paintFan = () => {
+        fan.clear() // 清空风扇画布
+        clearInterval(interval) // 清除前一步定时器
+        const fanStyle = { gradient: sunAngle + '-' + black + '-' + sunColor, stroke: black } // 风扇样式
+
+        interval = setInterval(() => {
+            fan.clear() // 清空风扇画布
+
+            fan.circle(center.x, center.y, axleR).attr(fanStyle) // 绘制风扇轴
+            fan.rect(center.x - stickWidth / 2, center.y + axleR, stickWidth, stickHeight).attr(fanStyle) // 绘制风扇杆
+
+            for (var i = 0; i < vaneCircleNum; i += 1) {
+                const distance = Math.sqrt(2) * (75 - (i * 2.5)) // 同一片扇叶上，系列小圆圈与中心点的距离
+                const r = 50 - (i * i / 10) // 同一片扇叶上，系列小圆圈的半径
+
+                Array(vaneNum).fill(null).map((_, index) => {
+                    const angle = 2 * Math.PI * index / vaneNum + key * (isCW ? (-1 / 16) : (1 / 16)) // 各片扇叶的旋转角度
+                    fan.circle(center.x + Math.sin(angle) * distance, center.y + Math.cos(angle) * distance, r).attr(fanStyle) // 绘制扇叶
+                })
+            }
+
+            key += 1 // 更新全局计数
+        }, timer)
+    }
+    paintFan()
+</script>
+<script>
+    const onClickSun = () => {
+        sunColor = colors.filter(color => color !== sunColor)[Math.floor(Math.random() * (colors.length - 1))] // 生成随机色
+        paintSun()
+        paintFan()
+    }
+    const onClickSpeed = () => {
+        timer = speeds[speeds.findIndex((speed) => speed === timer) + 1] ?? speeds[0] // 修改风扇转速
+        paintFan()
+    }
+    const onClickDir = () => {
+        isCW = !isCW // 反转风扇转向
+        paintFan()
+    }
+    const onClickVane = () => {
+        vaneNum = vaneNum + 1 > Math.max(...vaneNums) ? Math.min(...vaneNums) : vaneNum + 1 // 修改扇叶数量
+        paintFan()
+    }
+</script>
+<style>
+    #main {
+        min-width: 800px;
+    }
+
+    #sun {
+        position: absolute;
+        left: 25%;
+        border-radius: 50%;
+        box-shadow: 10px 5px 5px grey;
+        cursor: pointer;
+    }
+
+    #fan {
+        text-align: center;
+        border-bottom: solid 1px black;
+    }
+
+    #buttons {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+        height: 100px;
+        transform: translateY(-100px);
+    }
+
+    #buttons div {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: white;
+        cursor: pointer;
+    }
+
+    #buttons div:hover {
+        background-color: aqua;
+    }
+</style>
